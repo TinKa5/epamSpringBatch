@@ -27,10 +27,8 @@ import java.sql.SQLException;
 
 @Configuration
 @Import({DataSourceConfig.class, MailSenderConfig.class})
-
 @EnableBatchProcessing
-
-public class SpringButchConfig {
+public class SpringButchConfig extends DefaultBatchConfigurer {
 
 
     @Autowired
@@ -42,41 +40,39 @@ public class SpringButchConfig {
     @Autowired
     StepBuilderFactory stepBuilderFactory;
 
+    @Bean
+    public JdbcCursorItemReader<User> reader() {
+        JdbcCursorItemReader<User> reader = new JdbcCursorItemReader<User>();
+        reader.setDataSource(dataSource);
+        reader.setSql("Select name, balance, mail from bills");
+        reader.setRowMapper(new UserRowMapper());
+        return reader;
+    }
 
+
+    public class UserRowMapper implements RowMapper<User> {
+
+        @Override
+        public User mapRow(ResultSet resultSet, int i) throws SQLException {
+            User user = new User();
+            user.setName(resultSet.getString("name"));
+            user.setBalance(resultSet.getLong("balance"));
+            user.setMail(resultSet.getString("mail"));
+            return user;
+        }
+    }
 
     @Bean
-    public JdbcCursorItemReader<User> reader(){
-    JdbcCursorItemReader<User> reader=new JdbcCursorItemReader<User>();
-    reader.setDataSource(dataSource);
-    reader.setSql("Select name, balance, mail from bills");
-    reader.setRowMapper(new UserRowMapper());
-    return reader;
-}
-
-
-public class UserRowMapper implements RowMapper<User>{
-
-    @Override
-    public User mapRow(ResultSet resultSet, int i) throws SQLException {
-        User user=new User();
-        user.setName(resultSet.getString("name"));
-        user.setBalance(resultSet.getLong("balance"));
-        user.setMail(resultSet.getString("mail"));
-        return user;
-    }
-}
-
-@Bean
-public UserMailItemProcessor processor(){
+    public UserMailItemProcessor processor() {
         return new UserMailItemProcessor();
-}
+    }
 
-@Bean
-public SimpleMailMessageItemWriter writer(){
-     SimpleMailMessageItemWriter writer=new SimpleMailMessageItemWriter();
-     writer.setMailSender(sender);
-    return writer;
-}
+    @Bean
+    public SimpleMailMessageItemWriter writer() {
+        SimpleMailMessageItemWriter writer = new SimpleMailMessageItemWriter();
+        writer.setMailSender(sender);
+        return writer;
+    }
 
     @Bean
     public Step step1() {
@@ -97,4 +93,8 @@ public SimpleMailMessageItemWriter writer(){
                 .build();
     }
 
+    @Override
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = null;
+    }
 }

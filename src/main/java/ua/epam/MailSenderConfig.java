@@ -9,9 +9,9 @@ import java.util.Properties;
 
 @Configuration
 public class MailSenderConfig {
-@Bean
-    public JavaMailSender mailSender(){
-        JavaMailSenderImpl sender=new JavaMailSenderImpl();
+    @Bean
+    public JavaMailSender mailSender() {
+        JavaMailSenderImpl sender = new JavaMailSenderImpl();
         sender.setHost("smtp.gmail.com");
         sender.setPort(587);
         sender.setUsername("tanua8282@gmail.com");
