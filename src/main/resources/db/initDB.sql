@@ -1,0 +1,8 @@
+DROP TABLE IF EXISTS bills
+
+CREATE TABLE bills(
+  id INT AUTO_INCREMENT PRIMARY KEY ,
+  name VARCHAR(30) NOT NULL,
+  balance INT,
+  mail VARCHAR (50) NOT NULL 
+)
